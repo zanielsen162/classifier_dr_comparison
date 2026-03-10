@@ -1,5 +1,5 @@
 from sklearn import cluster, decomposition
-from sklearn.manifold import MDS, Isomap
+from sklearn.manifold import MDS
 from pydiffmap import diffusion_map as dm
 import numpy as np
 
@@ -56,24 +56,6 @@ def run_mds(data, num_dim=10):
     test_components = mds.embedding_[n_train:]
 
     return DataReducer(train_components, test_components)
-
-"""
-Given the data name and number of dimensions, return isomap object
-Note: Isomap has transform but it can be unstable, so we fit on all then split
-"""
-def run_isomap(data, num_dim=10):
-    isomap = Isomap(n_components=num_dim)
-    # Stack train and test, fit on all
-    X_all = np.vstack([data.X_train, data.X_test])
-    isomap.fit_transform(X_all)
-    
-    # Split based on train size
-    n_train = len(data.X_train)
-    train_components = isomap.embedding_[:n_train]
-    test_components = isomap.embedding_[n_train:]
-
-    return DataReducer(train_components, test_components)
-
 
 """
 No dimensionality reduction - pass through original features as baseline

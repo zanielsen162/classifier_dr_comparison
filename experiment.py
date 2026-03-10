@@ -1,7 +1,7 @@
 from data import load_olivetti, load_newsgroups, load_minst, load_fashion_minst, Data
-from dim_red import run_pca, run_mds, run_diffusion_map, run_isomap, run_none
+from dim_red import run_pca, run_mds, run_diffusion_map, run_none
 from classifier import KNN, logreg, naive_bayes
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score
 from typing import List, Dict
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,7 +18,6 @@ LOADERS = {
 }
 
 REDUCERS = {
-    'isomap': run_isomap,
     'mds': run_mds,
     'diff_map': run_diffusion_map,
     'pca': run_pca,
@@ -72,23 +71,17 @@ def analyze_data(
             'accuracy': accuracy_score(y_true, y_pred),
             'precision': precision_score(y_true, y_pred, average='macro', zero_division=0),
             'recall': recall_score(y_true, y_pred, average='macro', zero_division=0),
-            'f1': f1_score(y_true, y_pred, average='macro', zero_division=0),
         }
     
     # summary of stats for all dimensions
     dimensions = sorted(metrics.keys())
     accuracies = [metrics[d]['accuracy'] for d in dimensions]
-    f1_scores = [metrics[d]['f1'] for d in dimensions]
     
     summary = {
         'best_accuracy_dim': dimensions[np.argmax(accuracies)],
         'best_accuracy': max(accuracies),
-        'best_f1_dim': dimensions[np.argmax(f1_scores)],
-        'best_f1': max(f1_scores),
         'mean_accuracy': np.mean(accuracies),
         'std_accuracy': np.std(accuracies),
-        'mean_f1': np.mean(f1_scores),
-        'std_f1': np.std(f1_scores),
     }
     
     return {
@@ -110,7 +103,6 @@ def plot_results(
     accuracies = [metrics[d]['accuracy'] for d in dimensions]
     precisions = [metrics[d]['precision'] for d in dimensions]
     recalls = [metrics[d]['recall'] for d in dimensions]
-    f1_scores = [metrics[d]['f1'] for d in dimensions]
     
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     
@@ -119,7 +111,6 @@ def plot_results(
     ax1.plot(dimensions, accuracies, 'o-', label='Accuracy', linewidth=2)
     ax1.plot(dimensions, precisions, 's-', label='Precision', linewidth=2)
     ax1.plot(dimensions, recalls, '^-', label='Recall', linewidth=2)
-    ax1.plot(dimensions, f1_scores, 'd-', label='F1 Score', linewidth=2)
     ax1.set_xlabel('Number of Dimensions')
     ax1.set_ylabel('Score')
     ax1.set_title('All Metrics')
@@ -130,17 +121,14 @@ def plot_results(
     # Plot accuracy and F1 with best dimension markers
     ax2 = axes[1]
     ax2.plot(dimensions, accuracies, 'o-', label='Accuracy', linewidth=2, color='tab:blue')
-    ax2.plot(dimensions, f1_scores, 'd-', label='F1 Score', linewidth=2, color='tab:orange')
     
     # Mark best dimensions
     summary = stats['summary']
     ax2.axvline(x=summary['best_accuracy_dim'], color='tab:blue', linestyle='--', alpha=0.5)
-    ax2.axvline(x=summary['best_f1_dim'], color='tab:orange', linestyle='--', alpha=0.5)
     
     ax2.set_xlabel('Number of Dimensions')
     ax2.set_ylabel('Score')
-    ax2.set_title(f"Best Acc: {summary['best_accuracy']:.3f} (d={summary['best_accuracy_dim']}), "
-                  f"Best F1: {summary['best_f1']:.3f} (d={summary['best_f1_dim']})")
+    ax2.set_title(f"Best Acc: {summary['best_accuracy']:.3f} (d={summary['best_accuracy_dim']})")
     ax2.legend()
     ax2.grid(True, alpha=0.3)
     ax2.set_ylim(0, 1)
@@ -206,8 +194,8 @@ def pipeline(
     
     return stats, figure
 
-def grab_testing_data(output='results'):
-    options = list(itertools.product(*[LOADERS.keys(), REDUCERS.keys(), CLASSIFIERS.keys()]))
+def grab_testing_data(output='results', datasets=LOADERS.keys()):
+    options = list(itertools.product(*[datasets, REDUCERS.keys(), CLASSIFIERS.keys()]))
 
     for val in options:
         data, reducer, classifier = val
@@ -228,7 +216,6 @@ def grab_testing_data(output='results'):
         )
     
         print(f"\nBest accuracy: {stats['summary']['best_accuracy']:.3f} at d={stats['summary']['best_accuracy_dim']}")
-        print(f"Best F1: {stats['summary']['best_f1']:.3f} at d={stats['summary']['best_f1_dim']}")
 
 
 if __name__ == "__main__":
@@ -236,6 +223,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Run classifier experiments with dimensionality reduction")
     parser.add_argument("--full", type=bool, default=False)
+    parser.add_argument("--datasets", type=str, nargs="+", default=list(REDUCERS.keys()))
     parser.add_argument("--data", type=str, default="faces", 
                         choices=list(LOADERS.keys()),
                         help="Dataset to use")
@@ -253,7 +241,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if args.full:
-        grab_testing_data(args.output)
+        grab_testing_data(args.output, args.datasets)
     else:
         print(f"Running: {args.data} + {args.reducer} + {args.classifier}")
         print(f"Dimensions: {args.dims}")
@@ -267,7 +255,6 @@ if __name__ == "__main__":
         )
         
         print(f"\nBest accuracy: {stats['summary']['best_accuracy']:.3f} at d={stats['summary']['best_accuracy_dim']}")
-        print(f"Best F1: {stats['summary']['best_f1']:.3f} at d={stats['summary']['best_f1_dim']}")
 
 # faces: 4096 features, 2 5 10 20 50 100
 # newsgroups: 5000 features, 5 10 25 50 100 200
