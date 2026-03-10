@@ -204,6 +204,9 @@ def grab_testing_data(output='results', datasets=LOADERS.keys()):
         if data == 'newsgroups':
             dims = [5, 10, 25, 50, 100, 200]
 
+        if reducer == None:
+            dims = [10]
+
         print(f"Running: {data} + {reducer} + {classifier}")
         print(f"Dimensions: {dims}")
         
