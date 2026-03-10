@@ -49,6 +49,7 @@ def load_fashion_minst():
     X, y = fetch_openml("Fashion-MNIST", version=1, return_X_y=True, parser='auto')
     n_samples, n_features = X.shape
 
+    print(f"Fashion MINST: {n_samples} samples, {n_features} features")
     return Data(X, y, n_samples, n_features)
 
 def load_minst():
@@ -56,4 +57,5 @@ def load_minst():
     X, y = fetch_openml("mnist_784", version=1, return_X_y=True, parser='auto')
     n_samples, n_features = X.shape
 
+    print(f"MINST: {n_samples} samples, {n_features} features")
     return Data(X, y, n_samples, n_features)

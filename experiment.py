@@ -1,5 +1,5 @@
 from data import load_olivetti, load_newsgroups, load_minst, load_fashion_minst, Data
-from dim_red import run_pca, run_mds, run_diffusion_map, run_isomap
+from dim_red import run_pca, run_mds, run_diffusion_map, run_isomap, run_none
 from classifier import KNN, logreg, naive_bayes
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from typing import List, Dict
@@ -20,6 +20,7 @@ REDUCERS = {
     'mds': run_mds,
     'diff_map': run_diffusion_map,
     'pca': run_pca,
+    'none': run_none,
 }
 
 CLASSIFIERS = {
@@ -238,3 +239,7 @@ if __name__ == "__main__":
     print(f"\nBest accuracy: {stats['summary']['best_accuracy']:.3f} at d={stats['summary']['best_accuracy_dim']}")
     print(f"Best F1: {stats['summary']['best_f1']:.3f} at d={stats['summary']['best_f1_dim']}")
 
+# faces: 4096 features, 2 5 10 20 50 100
+# newsgroups: 5000 features, 5 10 25 50 100 200
+# fashion-minst: 784 features, 2 5 10 20 50 100
+# minst: 784 features, 2 5 10 20 50 100

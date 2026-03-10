@@ -73,3 +73,11 @@ def run_isomap(data, num_dim=10):
     test_components = isomap.embedding_[n_train:]
 
     return DataReducer(train_components, test_components)
+
+
+"""
+No dimensionality reduction - pass through original features as baseline
+"""
+def run_none(data, num_dim=None):
+    # Just return the original data as components
+    return DataReducer(np.array(data.X_train), np.array(data.X_test))
