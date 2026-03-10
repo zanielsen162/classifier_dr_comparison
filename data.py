@@ -1,12 +1,18 @@
 from sklearn.datasets import fetch_openml, fetch_20newsgroups, fetch_olivetti_faces
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
 
 class Data:
-    def __init__(self, X, y, n_samples, n_features):
+    def __init__(self, X, y, n_samples, n_features, test_size=0.2, random_state=42):
         self.X = X
         self.y = y
         self.n_samples = n_samples
         self.n_features = n_features
+        
+        # Create train/test split with stratification
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+            X, y, test_size=test_size, stratify=y, random_state=random_state
+        )
 
 """
 Load data functions return (X, y, n_samples, n_features)

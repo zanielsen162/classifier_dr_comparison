@@ -1,14 +1,12 @@
 from data import load_olivetti, load_newsgroups, load_minst, load_fashion_minst, Data
 from dim_red import run_pca, run_mds, run_diffusion_map, run_isomap
+from classifier import KNN, logreg, naive_bayes
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from typing import List, Dict
 import numpy as np
 import matplotlib.pyplot as plt
 import json
 import os
-
-def foo(vectors, dimensions):
-    return []
 
 LOADERS = {
     'faces': load_olivetti,
@@ -25,9 +23,9 @@ REDUCERS = {
 }
 
 CLASSIFIERS = {
-    'knn': foo,
-    'bayes': foo,
-    'regression': foo
+    'knn': KNN,
+    'bayes': naive_bayes,
+    'regression': logreg
 }
 
 def get_classifier_results(
@@ -39,15 +37,19 @@ def get_classifier_results(
     """
     Takes data_name, dim_red, dimensions, and classifier type
     Loads data, performs reduction methods, runs classifier on different dimensions
-    Returns result of each dimension
+    Returns result of each dimension (predictions on test set)
     """
     reducer = REDUCERS.get(dim_red, run_pca)
-    classifier = CLASSIFIERS.get(classifier_type, foo)
+    classifier = CLASSIFIERS.get(classifier_type, logreg)
 
-    reduced = reducer(data.X, data.n_features)
+    reduced = reducer(data)
 
     return {
-        d: classifier(reduced.components[:, :d], d) for d in dimensions
+        d: classifier(
+            reduced.train_components[:, :d],
+            data.y_train,
+            reduced.test_components[:, :d]
+        ) for d in dimensions
     }
 
 def analyze_data(
@@ -172,10 +174,10 @@ def pipeline(
         classifier_type=classifier_type
     )
 
-    # analyze results
+    # analyze results (compare predictions to test labels)
     stats = analyze_data(
         classifier_res,
-        data.y
+        data.y_test
     )
 
     figure = plot_results(
@@ -200,3 +202,39 @@ def pipeline(
     print(f"Saved stats to {stats_path}")
     
     return stats, figure
+
+
+if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Run classifier experiments with dimensionality reduction")
+    parser.add_argument("--data", type=str, default="faces", 
+                        choices=list(LOADERS.keys()),
+                        help="Dataset to use")
+    parser.add_argument("--reducer", type=str, default="pca",
+                        choices=list(REDUCERS.keys()),
+                        help="Dimensionality reduction method")
+    parser.add_argument("--classifier", type=str, default="knn",
+                        choices=list(CLASSIFIERS.keys()),
+                        help="Classifier type")
+    parser.add_argument("--dims", type=int, nargs="+", default=[2, 5, 10, 20, 50],
+                        help="Dimensions to test")
+    parser.add_argument("--output", type=str, default="results",
+                        help="Output directory")
+    
+    args = parser.parse_args()
+    
+    print(f"Running: {args.data} + {args.reducer} + {args.classifier}")
+    print(f"Dimensions: {args.dims}")
+    
+    stats, fig = pipeline(
+        data_name=args.data,
+        dim_red_method=args.reducer,
+        dimensions=args.dims,
+        classifier_type=args.classifier,
+        output_dir=args.output
+    )
+    
+    print(f"\nBest accuracy: {stats['summary']['best_accuracy']:.3f} at d={stats['summary']['best_accuracy_dim']}")
+    print(f"Best F1: {stats['summary']['best_f1']:.3f} at d={stats['summary']['best_f1_dim']}")
+
