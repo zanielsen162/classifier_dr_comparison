@@ -1,40 +1,15 @@
 {
   "per_dimension": {
-    "2": {
-      "accuracy": 0.1375,
-      "precision": 0.05673611111111111,
-      "recall": 0.1375
-    },
-    "5": {
-      "accuracy": 0.1875,
-      "precision": 0.11367063492063492,
-      "recall": 0.1875
-    },
-    "10": {
-      "accuracy": 0.2375,
-      "precision": 0.18624999999999997,
-      "recall": 0.2375
-    },
-    "20": {
-      "accuracy": 0.2625,
-      "precision": 0.25089285714285714,
-      "recall": 0.2625
-    },
-    "50": {
-      "accuracy": 0.55,
-      "precision": 0.49375,
-      "recall": 0.55
-    },
-    "100": {
-      "accuracy": 0.5875,
-      "precision": 0.5583333333333333,
-      "recall": 0.5875
+    "4096": {
+      "accuracy": 0.8875,
+      "precision": 0.925,
+      "recall": 0.8875
     }
   },
   "summary": {
-    "best_accuracy_dim": 100,
-    "best_accuracy": 0.5875,
-    "mean_accuracy": 0.32708333333333334,
-    "std_accuracy": 0.17565601248526116
+    "best_accuracy_dim": 4096,
+    "best_accuracy": 0.8875,
+    "mean_accuracy": 0.8875,
+    "std_accuracy": 0.0
   }
 }

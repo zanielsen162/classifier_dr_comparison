@@ -18,7 +18,6 @@ LOADERS = {
 }
 
 REDUCERS = {
-    'mds': run_mds,
     'diff_map': run_diffusion_map,
     'pca': run_pca,
     'none': run_none,
@@ -195,30 +194,65 @@ def pipeline(
     return stats, figure
 
 def grab_testing_data(output='results', datasets=LOADERS.keys()):
-    options = list(itertools.product(*[datasets, REDUCERS.keys(), CLASSIFIERS.keys()]))
-
-    for val in options:
-        data, reducer, classifier = val
-
-        dims = [2, 5, 10, 20, 50, 100]
-        if data == 'newsgroups':
-            dims = [5, 10, 25, 50, 100, 200]
-
-        if reducer == None:
-            dims = [10]
-
-        print(f"Running: {data} + {reducer} + {classifier}")
-        print(f"Dimensions: {dims}")
-        
-        stats, fig = pipeline(
-            data_name=data,
-            dim_red_method=reducer,
-            dimensions=dims,
-            classifier_type=classifier,
-            output_dir=output
-        )
+    os.makedirs(output, exist_ok=True)
     
-        print(f"\nBest accuracy: {stats['summary']['best_accuracy']:.3f} at d={stats['summary']['best_accuracy_dim']}")
+    for data_name in datasets:
+        print(f"\n{'='*50}")
+        print(f"Loading dataset: {data_name}")
+        data = LOADERS.get(data_name, load_minst)()
+        
+        dims = [2, 5, 10, 20, 50, 100]
+        if data_name == 'newsgroups':
+            dims = [5, 10, 25, 50, 100, 200]
+        
+        for reducer_name in REDUCERS.keys():
+            print(f"\n  Reducing with: {reducer_name}")
+            
+            # Run reduction once
+            if reducer_name == 'none':
+                reduced_dims = [data.n_features]  # just use all features
+            else:
+                reduced_dims = dims
+            
+            reducer = REDUCERS.get(reducer_name, run_pca)
+            reduced = reducer(data)
+            
+            # Reuse reduced data for all classifiers
+            for classifier_name in CLASSIFIERS.keys():
+                print(f"    Classifier: {classifier_name}, dims: {reduced_dims}")
+                
+                classifier = CLASSIFIERS.get(classifier_name, logreg)
+                
+                # Run classifier on each dimension
+                classifier_res = {
+                    d: classifier(
+                        reduced.train_components[:, :d],
+                        data.y_train,
+                        reduced.test_components[:, :d]
+                    ) for d in reduced_dims
+                }
+                
+                # Analyze and plot
+                stats = analyze_data(classifier_res, data.y_test)
+                figure = plot_results(
+                    stats=stats,
+                    title=f"{data_name} - {reducer_name} - {classifier_name}"
+                )
+                
+                # Save outputs
+                base_name = f"{data_name}_{reducer_name}_{classifier_name}"
+                fig_path = os.path.join(output, f"{base_name}.png")
+                figure.savefig(fig_path, dpi=150, bbox_inches='tight')
+                plt.close(figure)
+                
+                stats_serializable = json.loads(
+                    json.dumps(stats, default=lambda x: float(x) if isinstance(x, np.floating) else int(x) if isinstance(x, np.integer) else x)
+                )
+                stats_path = os.path.join(output, f"{base_name}.json")
+                with open(stats_path, 'w') as f:
+                    json.dump(stats_serializable, f, indent=2)
+                
+                print(f"      Best accuracy: {stats['summary']['best_accuracy']:.3f} at d={stats['summary']['best_accuracy_dim']}")
 
 
 if __name__ == "__main__":

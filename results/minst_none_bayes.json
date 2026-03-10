@@ -1,0 +1,15 @@
+{
+  "per_dimension": {
+    "784": {
+      "accuracy": 0.5538571428571428,
+      "precision": 0.6804403504973078,
+      "recall": 0.5459942133622518
+    }
+  },
+  "summary": {
+    "best_accuracy_dim": 784,
+    "best_accuracy": 0.5538571428571428,
+    "mean_accuracy": 0.5538571428571428,
+    "std_accuracy": 0.0
+  }
+}
