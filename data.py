@@ -1,6 +1,13 @@
 from sklearn.datasets import fetch_openml, fetch_20newsgroups, fetch_olivetti_faces
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+class Data:
+    def __init__(self, X, y, n_samples, n_features):
+        self.X = X
+        self.y = y
+        self.n_samples = n_samples
+        self.n_features = n_features
+
 """
 Load data functions return (X, y, n_samples, n_features)
 - X: feature matrix (numpy array)
@@ -19,7 +26,7 @@ def load_olivetti(center=True):
         X -= X.mean(axis=1).reshape(n_samples, -1)
 
     print(f"Olivetti: {n_samples} samples, {n_features} features")
-    return X, y, n_samples, n_features
+    return Data(X, y, n_samples, n_features)
 
 def load_newsgroups(max_features=5000):
     newsgroups = fetch_20newsgroups(subset='all', shuffle=True, random_state=42)
@@ -29,18 +36,18 @@ def load_newsgroups(max_features=5000):
     n_samples, n_features = X.shape
 
     print(f"Newsgroups: {n_samples} samples, {n_features} features")
-    return X, y, n_samples, n_features
+    return Data(X, y, n_samples, n_features)
 
 def load_fashion_minst():
     # Fashion-MNIST
     X, y = fetch_openml("Fashion-MNIST", version=1, return_X_y=True, parser='auto')
     n_samples, n_features = X.shape
 
-    return X, y, n_samples, n_features
+    return Data(X, y, n_samples, n_features)
 
 def load_minst():
     # MNIST
     X, y = fetch_openml("mnist_784", version=1, return_X_y=True, parser='auto')
     n_samples, n_features = X.shape
 
-    return X, y, n_samples, n_features
+    return Data(X, y, n_samples, n_features)
