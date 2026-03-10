@@ -7,6 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 import os
+import itertools
+
 
 LOADERS = {
     'faces': load_olivetti,
@@ -204,11 +206,36 @@ def pipeline(
     
     return stats, figure
 
+def grab_testing_data(output='results'):
+    options = list(itertools.product(*[LOADERS.keys(), REDUCERS.keys(), CLASSIFIERS.keys()]))
+
+    for val in options:
+        data, reducer, classifier = val
+
+        dims = [2, 5, 10, 20, 50, 100]
+        if data == 'newsgroups':
+            dims = [5, 10, 25, 50, 100, 200]
+
+        print(f"Running: {data} + {reducer} + {classifier}")
+        print(f"Dimensions: {dims}")
+        
+        stats, fig = pipeline(
+            data_name=data,
+            dim_red_method=reducer,
+            dimensions=dims,
+            classifier_type=classifier,
+            output_dir=output
+        )
+    
+        print(f"\nBest accuracy: {stats['summary']['best_accuracy']:.3f} at d={stats['summary']['best_accuracy_dim']}")
+        print(f"Best F1: {stats['summary']['best_f1']:.3f} at d={stats['summary']['best_f1_dim']}")
+
 
 if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description="Run classifier experiments with dimensionality reduction")
+    parser.add_argument("--full", type=bool, default=False)
     parser.add_argument("--data", type=str, default="faces", 
                         choices=list(LOADERS.keys()),
                         help="Dataset to use")
@@ -225,19 +252,22 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    print(f"Running: {args.data} + {args.reducer} + {args.classifier}")
-    print(f"Dimensions: {args.dims}")
-    
-    stats, fig = pipeline(
-        data_name=args.data,
-        dim_red_method=args.reducer,
-        dimensions=args.dims,
-        classifier_type=args.classifier,
-        output_dir=args.output
-    )
-    
-    print(f"\nBest accuracy: {stats['summary']['best_accuracy']:.3f} at d={stats['summary']['best_accuracy_dim']}")
-    print(f"Best F1: {stats['summary']['best_f1']:.3f} at d={stats['summary']['best_f1_dim']}")
+    if args.full:
+        grab_testing_data(args.output)
+    else:
+        print(f"Running: {args.data} + {args.reducer} + {args.classifier}")
+        print(f"Dimensions: {args.dims}")
+        
+        stats, fig = pipeline(
+            data_name=args.data,
+            dim_red_method=args.reducer,
+            dimensions=args.dims,
+            classifier_type=args.classifier,
+            output_dir=args.output
+        )
+        
+        print(f"\nBest accuracy: {stats['summary']['best_accuracy']:.3f} at d={stats['summary']['best_accuracy_dim']}")
+        print(f"Best F1: {stats['summary']['best_f1']:.3f} at d={stats['summary']['best_f1_dim']}")
 
 # faces: 4096 features, 2 5 10 20 50 100
 # newsgroups: 5000 features, 5 10 25 50 100 200

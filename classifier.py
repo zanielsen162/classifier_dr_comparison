@@ -10,7 +10,7 @@ def KNN(X_train, y_train, X_test):
 
 
 def logreg(X_train, y_train, X_test):
-    logreg = LogisticRegression(solver='liblinear', max_iter=1000)
+    logreg = LogisticRegression(solver='lbfgs', max_iter=1000)
     logreg.fit(X_train, y_train)
     return logreg.predict(X_test)
 
