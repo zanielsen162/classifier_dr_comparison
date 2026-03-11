@@ -30,10 +30,11 @@ so we fit on all data then split (unsupervised, so no label leakage)
 """
 def run_diffusion_map(data, num_dim=10):
     diffusion_map = dm.DiffusionMap.from_sklearn(n_evecs=num_dim)
-    # Fit on all data
-    diffusion_map.fit_transform(data.X)
+    # Stack train and test, fit on all
+    X_all = np.vstack([data.X_train, data.X_test])
+    diffusion_map.fit_transform(X_all)
     
-    # Split based on original indices
+    # Split based on train size
     n_train = len(data.X_train)
     train_components = diffusion_map.dmap[:n_train]
     test_components = diffusion_map.dmap[n_train:]

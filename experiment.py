@@ -21,6 +21,7 @@ REDUCERS = {
     'diff_map': run_diffusion_map,
     'pca': run_pca,
     'none': run_none,
+    'mds': run_mds
 }
 
 CLASSIFIERS = {
@@ -193,7 +194,7 @@ def pipeline(
     
     return stats, figure
 
-def grab_testing_data(output='results', datasets=LOADERS.keys()):
+def grab_testing_data(output='results', datasets=LOADERS.keys(), reducers=REDUCERS.keys()):
     os.makedirs(output, exist_ok=True)
     
     for data_name in datasets:
@@ -205,7 +206,7 @@ def grab_testing_data(output='results', datasets=LOADERS.keys()):
         if data_name == 'newsgroups':
             dims = [5, 10, 25, 50, 100, 200]
         
-        for reducer_name in REDUCERS.keys():
+        for reducer_name in reducers:
             print(f"\n  Reducing with: {reducer_name}")
             
             # Run reduction once
@@ -264,7 +265,7 @@ if __name__ == "__main__":
     parser.add_argument("--data", type=str, default="faces", 
                         choices=list(LOADERS.keys()),
                         help="Dataset to use")
-    parser.add_argument("--reducer", type=str, default="pca",
+    parser.add_argument("--reducer", type=str, nargs="+", default=["pca"],
                         choices=list(REDUCERS.keys()),
                         help="Dimensionality reduction method")
     parser.add_argument("--classifier", type=str, default="knn",
@@ -278,7 +279,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if args.full:
-        grab_testing_data(args.output, args.datasets)
+        grab_testing_data(args.output, args.datasets, args.reducer)
     else:
         print(f"Running: {args.data} + {args.reducer} + {args.classifier}")
         print(f"Dimensions: {args.dims}")
