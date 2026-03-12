@@ -47,6 +47,40 @@ classifier_dr_comparison/
 pip install -r requirements.txt
 ```
 
+## Usage
+
+### Single Experiment
+
+Run a single experiment with specific parameters:
+
+```bash
+python experiment.py --data faces --reducer pca --classifier knn --dims 2 5 10 20 50
+```
+
+**Arguments:**
+
+| Argument | Options | Default | Description |
+|----------|---------|---------|-------------|
+| `--data` | `faces`, `newsgroups`, `fashion-minst`, `minst` | `faces` | Dataset to use |
+| `--reducer` | `pca`, `diff_map`, `none`, `mds` | `pca` | Dimensionality reduction method |
+| `--classifier` | `knn`, `bayes`, `regression` | `knn` | Classification algorithm |
+| `--dims` | integers | `2 5 10 20 50` | Dimensions to test |
+| `--output` | path | `results` | Output directory |
+
+### Full Experiment Suite
+
+Run all combinations of datasets, reducers, and classifiers:
+
+```bash
+python experiment.py --full True
+```
+
+Optionally limit to specific datasets or reducers:
+
+```bash
+python experiment.py --full True --datasets faces minst --reducer pca diff_map
+```
+
 ## Output
 
 Results are saved as JSON files in `results/` with the naming convention:
