@@ -36,7 +36,6 @@ classifier_dr_comparison/
 ├── dim_red.py           # Dimensionality reduction methods
 ├── classifier.py        # Classification algorithms
 ├── experiment.py        # Main experiment pipeline
-├── generate_latex_table.py  # LaTeX table generation
 ├── results/             # JSON output files
 └── requirements.txt
 ```
